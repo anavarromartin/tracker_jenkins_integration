@@ -1,0 +1,23 @@
+#!/usr/bin/python
+import httplib
+import re
+
+API_KEY = 'PIVOTAL_TRACKER_API_KEY'
+PROJECT_ID = 'PIVOTAL_TRACKER_PROJECT_ID'
+
+last_commit_msg = open('.git/COMMIT_EDITMSG', 'r').read()
+
+commit_search = re.search('\[done #(\d+)]', last_commit_msg, re.IGNORECASE)
+
+if not commit_search:
+	exit()
+
+story_id = commit_search.group(1)
+
+connection = httplib.HTTPSConnection('www.pivotaltracker.com')
+
+headers = {"Content-Type": "application/json", "X-TrackerToken": API_KEY}
+
+connection_body = '{"name": "pending_ci"}'
+
+connection.request('POST', '/services/v5/projects/' + PROJECT_ID + '/stories/' + story_id + '/labels', body=connection_body, headers=headers)
